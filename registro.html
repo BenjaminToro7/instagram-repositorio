@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instagram – Registro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/registro.css" />
+</head>
+<body>
+
+  <div class="page-wrapper">
+
+    <div class="right-panel">
+
+      <div class="login-card">
+
+        <!-- Logo -->
+        <h1 class="logo">Instagram</h1>
+
+        <!-- Subtítulo -->
+        <p class="registro-subtitle">
+          Regístrate para ver fotos y videos de tus amigos.
+        </p>
+
+        <!-- Botón Facebook -->
+        <button class="btn-facebook">
+          <span class="fb-icon">f</span>
+          Registrarse con Facebook
+        </button>
+
+        <!-- Separador -->
+        <div class="separator">
+          <span class="line"></span>
+          <span class="or-text">O</span>
+          <span class="line"></span>
+        </div>
+
+        <!-- Formulario -->
+        <div class="form-group">
+          <input
+            type="text"
+            id="telefono"
+            class="input-field"
+            placeholder="Número de celular o correo electrónico"
+          />
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="nombre"
+            class="input-field"
+            placeholder="Nombre completo"
+          />
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="usuario"
+            class="input-field"
+            placeholder="Nombre de usuario"
+          />
+        </div>
+
+        <div class="form-group" style="position: relative;">
+          <input
+            type="password"
+            id="password"
+            class="input-field"
+            placeholder="Contraseña"
+          />
+          <span class="toggle-password" onclick="togglePassword()">
+            👁
+          </span>
+        </div>
+
+        <!-- Mensaje de error -->
+        <p id="error-msg" class="error-msg"></p>
+
+        <!-- Botón registrarse -->
+        <button class="btn-primary" onclick="registrarse()">
+          Siguiente
+        </button>
+
+        <!-- Términos -->
+        <p class="terminos">
+          Al registrarte, aceptas nuestras
+          <a href="#">Condiciones</a>,
+          la <a href="#">Política de privacidad</a> y la
+          <a href="#">Política de cookies</a>.
+        </p>
+
+      </div>
+
+      <!-- Caja de login -->
+      <div class="register-card">
+        <p>
+          ¿Ya tienes una cuenta?
+          <a href="index.html" class="link-registro">Inicia sesión</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/registro.js"></script>
+</body>
+</html>
