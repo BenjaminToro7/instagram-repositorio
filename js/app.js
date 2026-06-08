@@ -389,27 +389,43 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.story[data-story-id="' + userId + '"] .story-avatar').forEach(el => el.classList.add('seen'));
   }
 
-  function openStoryViewer(userId) {
-    if (userId === 'tu_historia') {
-      alert('Agrega tu historia tocando el bot\u00F3n "+"');
-      return;
-    }
+  // ── Share modal ──
+  function showShareModal(userId) {
+    const existing = document.querySelector('.share-modal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'share-modal';
+    overlay.innerHTML =
+      '<div class="share-modal-backdrop"></div>' +
+      '<div class="share-modal-content">' +
+        '<div class="share-modal-header">Compartir historia de ' + userId + '</div>' +
+        '<div class="share-option" data-action="feed"><span class="share-icon">📰</span><span>Compartir en feed</span></div>' +
+        '<div class="share-option" data-action="dm"><span class="share-icon">📬</span><span>Enviar a mensaje directo</span></div>' +
+        '<div class="share-option" data-action="copy"><span class="share-icon">📋</span><span>Copiar enlace</span></div>' +
+        '<div class="share-option share-cancel" data-action="cancel"><span>Cancelar</span></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.querySelectorAll('.share-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const action = opt.dataset.action;
+        if (action === 'feed') alert('Historia compartida en tu feed');
+        else if (action === 'dm') alert('Historia enviada a tus mensajes');
+        else if (action === 'copy') { navigator.clipboard?.writeText(window.location.href).then(() => alert('Enlace copiado')).catch(() => alert('Enlace copiado')); }
+        overlay.remove();
+        document.body.style.overflow = '';
+      });
+    });
+    overlay.querySelector('.share-modal-backdrop').addEventListener('click', () => { overlay.remove(); document.body.style.overflow = ''; });
+  }
 
+  function openStoryViewer(userId) {
+    if (userId === 'tu_historia') { alert('Agrega tu historia tocando el botón "+"'); return; }
     markStorySeen(userId);
     const data = storyData[userId];
     if (!data) return;
-
     const allIds = Object.keys(storyData);
-
-    viewerState = {
-      userIds: allIds,
-      currentUserIdx: allIds.indexOf(userId),
-      currentStoryIdx: 0,
-      timer: null,
-      elapsed: 0,
-      interval: null
-    };
-
+    viewerState = { userIds: allIds, currentUserIdx: allIds.indexOf(userId), currentStoryIdx: 0, elapsed: 0, interval: null, keyHandler: null };
     renderStoryViewer();
   }
 
@@ -419,25 +435,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = storyData[userId];
     const story = data.stories[s.currentStoryIdx];
 
-    // Flat list of all stories across all users
+    // Build progress bars
     const allUserIds = [];
-    const allStoryIndices = [];
-    s.userIds.forEach(id => {
-      storyData[id].stories.forEach((_, si) => {
-        allUserIds.push(id);
-        allStoryIndices.push(si);
-      });
-    });
-
+    s.userIds.forEach(id => { storyData[id].stories.forEach((_, si) => { allUserIds.push(id); }); });
     let flatIdx = 0;
-    for (let i = 0; i < s.currentUserIdx; i++) { flatIdx += storyData[s.userIds[i]].stories.length; }
+    for (let i = 0; i < s.currentUserIdx; i++) flatIdx += storyData[s.userIds[i]].stories.length;
     flatIdx += s.currentStoryIdx;
-
-    const viewer = document.createElement('div');
-    viewer.className = 'story-viewer';
-    viewer.id = 'storyViewer';
-
-    // Progress bars
     let progressHTML = '<div class="story-progress">';
     allUserIds.forEach((uid, i) => {
       const cls = i < flatIdx ? 'done' : i === flatIdx ? 'active' : '';
@@ -445,6 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     progressHTML += '</div>';
 
+    const viewer = document.createElement('div');
+    viewer.className = 'story-viewer';
+    viewer.id = 'storyViewer';
     viewer.innerHTML = progressHTML +
       '<div class="story-gradient"></div>' +
       '<div class="story-top">' +
@@ -464,8 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
       '</div>' +
       '<div class="story-bottom">' +
         '<div class="story-bottom-left">' +
-          '<input type="text" class="story-reply-input" placeholder="Enviar mensaje\u2026" />' +
-          '<button class="story-send-btn">\u27A4</button>' +
+          '<input type="text" class="story-reply-input" placeholder="Enviar mensaje..." />' +
+          '<button class="story-send-btn">➤</button>' +
         '</div>' +
         '<div class="story-bottom-right">' +
           '<button class="story-like-btn" id="storyLikeBtn">' +
@@ -480,49 +486,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(viewer);
     document.body.style.overflow = 'hidden';
 
-    // ── Store everything on viewer for cleanup ──
-    viewer._userId = userId;
-    viewer._storyIdx = s.currentStoryIdx;
-    viewer._timers = [];
-
-    // Close handler
-    viewer.querySelector('#storyClose').addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeStoryViewer();
-    });
-
-    // Tap handlers
-    viewer.querySelector('#storyPrev').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(-1); });
-    viewer.querySelector('#storyNext').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(1); });
-
-    // Tap on content area itself = next (with double-tap detection)
-    viewer._clickTimer = null;
-    viewer.querySelector('.story-content-area').addEventListener('click', (e) => {
-      if (e.target.closest('.story-content-inner') || e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
-      if (viewer._clickTimer) {
-        clearTimeout(viewer._clickTimer);
-        viewer._clickTimer = null;
-        return;
-      }
-      viewer._clickTimer = setTimeout(() => {
-        if (!viewerState) return;
-        navigateStory(1);
-        viewer._clickTimer = null;
-      }, 260);
-      viewer._timers.push(viewer._clickTimer);
-    });
-
-    // Keyboard
-    const keyHandler = (e) => {
+    // ── Key handler (shared ref for cleanup) ──
+    s.keyHandler = (e) => {
       if (e.key === 'Escape') closeStoryViewer();
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigateStory(1); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); navigateStory(-1); }
     };
-    document.addEventListener('keydown', keyHandler);
+    document.addEventListener('keydown', s.keyHandler);
+
+    // ── Close button ──
+    document.getElementById('storyClose').onclick = (e) => { e.stopPropagation(); closeStoryViewer(); };
+
+    // ── Tap zones ──
+    document.getElementById('storyPrev').onclick = (e) => { e.stopPropagation(); navigateStory(-1); };
+    document.getElementById('storyNext').onclick = (e) => { e.stopPropagation(); navigateStory(1); };
 
     // ── Reply ──
     const replyInput = viewer.querySelector('.story-reply-input');
-    const sendReply = () => {
+    const doReply = () => {
       const val = replyInput.value.trim();
       if (!val) return;
       const replies = JSON.parse(localStorage.getItem('storyReplies_' + userId) || '[]');
@@ -533,62 +514,51 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.className = 'story-toast';
       toast.textContent = 'Mensaje enviado a ' + userId;
       viewer.querySelector('.story-bottom').appendChild(toast);
-      viewer._timers.push(setTimeout(() => toast.remove(), 2000));
+      setTimeout(() => toast.remove(), 2000);
     };
-    replyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendReply(); });
-    viewer.querySelector('.story-send-btn').addEventListener('click', sendReply);
+    replyInput.onkeydown = (e) => { if (e.key === 'Enter') doReply(); };
+    viewer.querySelector('.story-send-btn').onclick = doReply;
 
     // ── Like button ──
     const likeKey = 'storyLiked_' + userId + '_' + s.currentStoryIdx;
-    const likeBtn = viewer.querySelector('#storyLikeBtn');
+    const likeBtn = document.getElementById('storyLikeBtn');
     const likeSvg = likeBtn.querySelector('svg');
-    const isLiked = localStorage.getItem(likeKey) === 'true';
-    if (isLiked) {
+    if (localStorage.getItem(likeKey) === 'true') {
       likeSvg.style.fill = '#ed4956';
       likeSvg.style.stroke = '#ed4956';
     }
-    likeBtn.addEventListener('click', (e) => {
+    likeBtn.onclick = (e) => {
       e.stopPropagation();
       const liked = localStorage.getItem(likeKey) !== 'true';
       localStorage.setItem(likeKey, liked);
       likeSvg.style.fill = liked ? '#ed4956' : 'none';
       likeSvg.style.stroke = liked ? '#ed4956' : '';
-      if (liked) likeSvg.style.animation = 'heartPop .3s ease';
-      else likeSvg.style.animation = '';
-      viewer._timers.push(setTimeout(() => { likeSvg.style.animation = ''; }, 300));
-    });
+      if (liked) { likeSvg.style.animation = 'heartPop .3s ease'; setTimeout(() => { likeSvg.style.animation = ''; }, 300); }
+    };
 
     // ── Double-tap to like on content ──
-    viewer.querySelector('.story-content-area').addEventListener('dblclick', (e) => {
+    viewer.querySelector('.story-content-area').ondblclick = (e) => {
       if (e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
-      if (viewer._clickTimer) {
-        clearTimeout(viewer._clickTimer);
-        viewer._clickTimer = null;
-      }
-      const alreadyLiked = localStorage.getItem(likeKey) === 'true';
-      if (!alreadyLiked) {
-        likeBtn.click();
-      }
+      if (localStorage.getItem(likeKey) !== 'true') likeBtn.click();
       showFloatingHeart(viewer.querySelector('.story-content-area'));
-    });
+    };
 
     // ── Share button ──
-    viewer.querySelector('#storyShareBtn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      showShareModal(userId);
-    });
+    document.getElementById('storyShareBtn').onclick = (e) => { e.stopPropagation(); showShareModal(userId); };
 
-    // Start auto-advance
-    startAutoAdvance();
+    // ── Auto-advance ──
+    clearAutoAdvance();
+    s.elapsed = 0;
+    s.interval = setInterval(() => {
+      s.elapsed += 0.1;
+      if (s.elapsed >= 4) navigateStory(1);
+    }, 100);
 
-    // Store cleanup
-    viewer._keyHandler = keyHandler;
-
-    // Animate progress fill
+    // ── Progress bar fill animation ──
     requestAnimationFrame(() => {
-      const activeBar = viewer.querySelector('.story-progress-bar.active .fill');
-      if (activeBar) activeBar.style.transition = 'width ' + 4 + 's linear';
-      requestAnimationFrame(() => { if (activeBar) activeBar.style.width = '100%'; });
+      const bar = viewer.querySelector('.story-progress-bar.active .fill');
+      if (bar) bar.style.transition = 'width 4s linear';
+      requestAnimationFrame(() => { if (bar) bar.style.width = '100%'; });
     });
   }
 
@@ -597,46 +567,17 @@ document.addEventListener('DOMContentLoaded', () => {
     clearAutoAdvance();
     const s = viewerState;
     const userStories = storyData[s.userIds[s.currentUserIdx]].stories;
-
     let newUserIdx = s.currentUserIdx;
     let newStoryIdx = s.currentStoryIdx + dir;
-
-    if (newStoryIdx < 0) {
-      newUserIdx--;
-      if (newUserIdx < 0) { closeStoryViewer(); return; }
-      newStoryIdx = storyData[s.userIds[newUserIdx]].stories.length - 1;
-    } else if (newStoryIdx >= userStories.length) {
-      newUserIdx++;
-      if (newUserIdx >= s.userIds.length) { closeStoryViewer(); return; }
-      newStoryIdx = 0;
-    }
-
+    if (newStoryIdx < 0) { newUserIdx--; if (newUserIdx < 0) { closeStoryViewer(); return; } newStoryIdx = storyData[s.userIds[newUserIdx]].stories.length - 1; }
+    else if (newStoryIdx >= userStories.length) { newUserIdx++; if (newUserIdx >= s.userIds.length) { closeStoryViewer(); return; } newStoryIdx = 0; }
     markStorySeen(s.userIds[newUserIdx]);
     s.currentUserIdx = newUserIdx;
     s.currentStoryIdx = newStoryIdx;
     s.elapsed = 0;
-
-    destroyViewer();
+    const old = document.getElementById('storyViewer');
+    if (old) { document.removeEventListener('keydown', s.keyHandler); old.remove(); }
     renderStoryViewer();
-  }
-
-  function destroyViewer() {
-    const oldViewer = document.getElementById('storyViewer');
-    if (!oldViewer) return;
-    oldViewer._timers?.forEach(t => clearTimeout(t));
-    document.removeEventListener('keydown', oldViewer._keyHandler);
-    oldViewer.remove();
-  }
-
-  function startAutoAdvance() {
-    clearAutoAdvance();
-    viewerState.elapsed = 0;
-    viewerState.interval = setInterval(() => {
-      viewerState.elapsed += 0.1;
-      if (viewerState.elapsed >= 4) {
-        navigateStory(1);
-      }
-    }, 100);
   }
 
   function clearAutoAdvance() {
@@ -648,55 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
     clearAutoAdvance();
     const viewer = document.getElementById('storyViewer');
     if (viewer) {
+      document.removeEventListener('keydown', viewerState.keyHandler);
       viewer.classList.add('closing');
-      viewer._timers?.forEach(t => clearTimeout(t));
-      document.removeEventListener('keydown', viewer._keyHandler);
       setTimeout(() => { viewer.remove(); document.body.style.overflow = ''; }, 200);
     }
     viewerState = null;
-  }
-
-  // ── Share modal ──
-  function showShareModal(userId) {
-    const existing = document.querySelector('.share-modal');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.className = 'share-modal';
-    overlay.innerHTML =
-      '<div class="share-modal-backdrop"></div>' +
-      '<div class="share-modal-content">' +
-        '<div class="share-modal-header">Compartir historia de ' + userId + '</div>' +
-        '<div class="share-option" data-action="feed"><span class="share-icon">\uD83D\uDCF0</span><span>Compartir en feed</span></div>' +
-        '<div class="share-option" data-action="dm"><span class="share-icon">\uD83D\uDCEC</span><span>Enviar a mensaje directo</span></div>' +
-        '<div class="share-option" data-action="copy"><span class="share-icon">\uD83D\uDCCB</span><span>Copiar enlace</span></div>' +
-        '<div class="share-option share-cancel" data-action="cancel"><span>Cancelar</span></div>' +
-      '</div>';
-
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-
-    overlay.querySelectorAll('.share-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        const action = opt.dataset.action;
-        if (action === 'feed') {
-          alert('Historia compartida en tu feed');
-        } else if (action === 'dm') {
-          alert('Historia enviada a tus mensajes');
-        } else if (action === 'copy') {
-          navigator.clipboard?.writeText(window.location.href)
-            .then(() => alert('Enlace copiado'))
-            .catch(() => alert('Enlace copiado'));
-        }
-        overlay.remove();
-        document.body.style.overflow = '';
-      });
-    });
-
-    overlay.querySelector('.share-modal-backdrop').addEventListener('click', () => {
-      overlay.remove();
-      document.body.style.overflow = '';
-    });
   }
 
   // Bind story clicks
