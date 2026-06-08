@@ -956,16 +956,31 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 16px;
+    padding: 12px 16px;
     z-index: 2;
     display: flex;
-    gap: 8px;
     align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.story-bottom-left{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.story-bottom-right{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .story-reply-input{
     flex: 1;
-    padding: 12px 16px;
+    padding: 10px 16px;
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 24px;
     background: rgba(255,255,255,0.08);
@@ -975,19 +990,20 @@ body {
     outline: none;
     backdrop-filter: blur(4px);
     transition: background 0.2s, border-color 0.2s;
+    min-width: 0;
 }
 
 .story-reply-input::placeholder{ color: rgba(255,255,255,0.5); }
 .story-reply-input:focus{ background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
 
 .story-send-btn{
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: none;
     color: #0095f6;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -997,6 +1013,52 @@ body {
 }
 
 .story-send-btn:hover{ transform: scale(1.15); }
+
+/* ── Story bottom icon buttons (like / share) ── */
+.story-like-btn,
+.story-share-btn{
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.story-like-btn:hover,
+.story-share-btn:hover{
+    transform: scale(1.15);
+}
+
+.story-like-btn svg{
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+    transition: fill 0.2s, stroke 0.2s, transform 0.2s;
+}
+
+/* ── Story toast ── */
+.story-toast{
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    white-space: nowrap;
+    animation: storyToastIn 0.25s ease;
+    z-index: 10;
+}
+
+@keyframes storyToastIn{
+    from{ opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to{ opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* ── Gradient overlay at bottom ── */
 .story-gradient{
@@ -1087,6 +1149,90 @@ body.dark-mode .story-avatar.seen{
     0% { opacity: 1; transform: translate(-50%,-50%) scale(0); }
     40% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
     100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); }
+}
+
+/* ===== SHARE MODAL ===== */
+.share-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: shareFadeIn 0.2s ease;
+}
+
+.share-modal-backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.share-modal-content{
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-card, #fff);
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px;
+    animation: shareSlideUp 0.25s ease;
+}
+
+body.dark-mode .share-modal-content{
+    background: #1a1a1a;
+}
+
+@keyframes shareFadeIn{
+    from{ opacity: 0; }
+    to{ opacity: 1; }
+}
+
+@keyframes shareSlideUp{
+    from{ transform: translateY(100%); }
+    to{ transform: translateY(0); }
+}
+
+.share-modal-header{
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 16px;
+    color: var(--text-primary, #262626);
+}
+
+.share-option{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--text-primary, #262626);
+    transition: background 0.2s;
+}
+
+.share-option:hover{
+    background: var(--bg-input, #f5f5f5);
+}
+
+body.dark-mode .share-option:hover{
+    background: #2a2a2a;
+}
+
+.share-icon{
+    font-size: 22px;
+    width: 36px;
+    text-align: center;
+}
+
+.share-cancel{
+    justify-content: center;
+    color: var(--accent, #0095f6);
+    font-weight: 600;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-color, #dbdbdb);
+    padding-top: 16px;
 }
 
 /* ── Responsive ── */

@@ -463,8 +463,18 @@ document.addEventListener('DOMContentLoaded', () => {
         '<div class="story-tap-right" id="storyNext"></div>' +
       '</div>' +
       '<div class="story-bottom">' +
-        '<input type="text" class="story-reply-input" placeholder="Enviar mensaje\u2026" />' +
-        '<button class="story-send-btn">\u27A4</button>' +
+        '<div class="story-bottom-left">' +
+          '<input type="text" class="story-reply-input" placeholder="Enviar mensaje\u2026" />' +
+          '<button class="story-send-btn">\u27A4</button>' +
+        '</div>' +
+        '<div class="story-bottom-right">' +
+          '<button class="story-like-btn" id="storyLikeBtn">' +
+            '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>' +
+          '</button>' +
+          '<button class="story-share-btn" id="storyShareBtn">' +
+            '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+          '</button>' +
+        '</div>' +
       '</div>';
 
     document.body.appendChild(viewer);
@@ -477,10 +487,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('storyPrev').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(-1); });
     document.getElementById('storyNext').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(1); });
 
-    // Tap on content area itself = next
+    // Tap on content area itself = next (with double-tap detection)
+    let contentClickTimer = null;
     viewer.querySelector('.story-content-area').addEventListener('click', (e) => {
       if (e.target.closest('.story-content-inner') || e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
-      navigateStory(1);
+      if (contentClickTimer) {
+        clearTimeout(contentClickTimer);
+        contentClickTimer = null;
+        return;
+      }
+      contentClickTimer = setTimeout(() => {
+        navigateStory(1);
+        contentClickTimer = null;
+      }, 260);
     });
 
     // Keyboard
@@ -491,12 +510,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.addEventListener('keydown', keyHandler);
 
-    // Reply
-    viewer.querySelector('.story-reply-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const val = e.target.value.trim();
-        if (val) { alert('Mensaje enviado a ' + userId + ': ' + val); e.target.value = ''; }
+    // ── Reply: Enter key ──
+    const replyInput = viewer.querySelector('.story-reply-input');
+    const sendReply = () => {
+      const val = replyInput.value.trim();
+      if (!val) return;
+      const replies = JSON.parse(localStorage.getItem('storyReplies_' + userId) || '[]');
+      replies.push({ text: val, timestamp: Date.now() });
+      localStorage.setItem('storyReplies_' + userId, JSON.stringify(replies));
+      replyInput.value = '';
+      const toast = document.createElement('div');
+      toast.className = 'story-toast';
+      toast.textContent = 'Mensaje enviado a ' + userId;
+      viewer.querySelector('.story-bottom').appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    };
+    replyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendReply(); });
+    viewer.querySelector('.story-send-btn').addEventListener('click', sendReply);
+
+    // ── Like button ──
+    const likeKey = 'storyLiked_' + userId + '_' + s.currentStoryIdx;
+    const likeBtn = document.getElementById('storyLikeBtn');
+    const likeSvg = likeBtn.querySelector('svg');
+    const isLiked = localStorage.getItem(likeKey) === 'true';
+    if (isLiked) {
+      likeSvg.style.fill = '#ed4956';
+      likeSvg.style.stroke = '#ed4956';
+    }
+    likeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const liked = localStorage.getItem(likeKey) !== 'true';
+      localStorage.setItem(likeKey, liked);
+      likeSvg.style.fill = liked ? '#ed4956' : 'none';
+      likeSvg.style.stroke = liked ? '#ed4956' : '';
+      if (liked) likeSvg.style.animation = 'heartPop .3s ease';
+      else likeSvg.style.animation = '';
+      setTimeout(() => { likeSvg.style.animation = ''; }, 300);
+    });
+
+    // ── Double-tap to like on content ──
+    viewer.querySelector('.story-content-area').addEventListener('dblclick', (e) => {
+      if (e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
+      if (contentClickTimer) {
+        clearTimeout(contentClickTimer);
+        contentClickTimer = null;
       }
+      const alreadyLiked = localStorage.getItem(likeKey) === 'true';
+      if (!alreadyLiked) {
+        likeBtn.click();
+      }
+      showFloatingHeart(viewer.querySelector('.story-content-area'));
+    });
+
+    // ── Share button ──
+    document.getElementById('storyShareBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showShareModal(userId);
     });
 
     // Start auto-advance
@@ -566,6 +635,49 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { viewer.remove(); document.body.style.overflow = ''; }, 200);
     }
     viewerState = null;
+  }
+
+  // ── Share modal ──
+  function showShareModal(userId) {
+    const existing = document.querySelector('.share-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'share-modal';
+    overlay.innerHTML =
+      '<div class="share-modal-backdrop"></div>' +
+      '<div class="share-modal-content">' +
+        '<div class="share-modal-header">Compartir historia de ' + userId + '</div>' +
+        '<div class="share-option" data-action="feed"><span class="share-icon">\uD83D\uDCF0</span><span>Compartir en feed</span></div>' +
+        '<div class="share-option" data-action="dm"><span class="share-icon">\uD83D\uDCEC</span><span>Enviar a mensaje directo</span></div>' +
+        '<div class="share-option" data-action="copy"><span class="share-icon">\uD83D\uDCCB</span><span>Copiar enlace</span></div>' +
+        '<div class="share-option share-cancel" data-action="cancel"><span>Cancelar</span></div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.querySelectorAll('.share-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const action = opt.dataset.action;
+        if (action === 'feed') {
+          alert('Historia compartida en tu feed');
+        } else if (action === 'dm') {
+          alert('Historia enviada a tus mensajes');
+        } else if (action === 'copy') {
+          navigator.clipboard?.writeText(window.location.href)
+            .then(() => alert('Enlace copiado'))
+            .catch(() => alert('Enlace copiado'));
+        }
+        overlay.remove();
+        document.body.style.overflow = '';
+      });
+    });
+
+    overlay.querySelector('.share-modal-backdrop').addEventListener('click', () => {
+      overlay.remove();
+      document.body.style.overflow = '';
+    });
   }
 
   // Bind story clicks
