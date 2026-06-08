@@ -54,7 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.togglePassword = () => {
       const el = document.getElementById('password');
-      if (el) el.type = el.type === 'password' ? 'text' : 'password';
+      const icon = document.getElementById('toggleIcon');
+      if (!el) return;
+      const showing = el.type === 'text';
+      el.type = showing ? 'password' : 'text';
+      if (icon) icon.src = showing ? 'images/mirar.png' : 'images/nomirar.png';
     };
     return;
   }

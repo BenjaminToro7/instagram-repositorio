@@ -146,8 +146,44 @@ body{
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    font-size: 18px;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.toggle-password:hover{
+    background: rgba(0,0,0,0.05);
+}
+
+.toggle-password img{
+    width: 20px;
+    height: 20px;
+    display: block;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.toggle-password:hover img{
+    opacity: 0.9;
+    transform: scale(1.1);
+}
+
+body.dark-mode .toggle-password:hover{
+    background: rgba(255,255,255,0.08);
+}
+
+body.dark-mode .toggle-password img{
+    filter: invert(1);
+    opacity: 0.5;
+}
+
+body.dark-mode .toggle-password:hover img{
+    opacity: 0.85;
 }
 
 .btn-primary{

@@ -31,17 +31,10 @@ btnRegister.addEventListener("click", function() {
 
 
 function togglePassword() {
-
-    if(password.type === "password") {
-
-        password.type = "text";
-
-    } else {
-
-        password.type = "password";
-
-    }
-
+    const icon = document.getElementById('toggleIconReg');
+    const showing = password.type === 'text';
+    password.type = showing ? 'password' : 'text';
+    if (icon) icon.src = showing ? 'images/mirar.png' : 'images/nomirar.png';
 }
 
 
