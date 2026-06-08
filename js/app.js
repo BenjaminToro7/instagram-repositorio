@@ -480,26 +480,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(viewer);
     document.body.style.overflow = 'hidden';
 
+    // ── Store everything on viewer for cleanup ──
+    viewer._userId = userId;
+    viewer._storyIdx = s.currentStoryIdx;
+    viewer._timers = [];
+
     // Close handler
-    document.getElementById('storyClose').addEventListener('click', closeStoryViewer);
+    viewer.querySelector('#storyClose').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeStoryViewer();
+    });
 
     // Tap handlers
-    document.getElementById('storyPrev').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(-1); });
-    document.getElementById('storyNext').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(1); });
+    viewer.querySelector('#storyPrev').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(-1); });
+    viewer.querySelector('#storyNext').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(1); });
 
     // Tap on content area itself = next (with double-tap detection)
-    let contentClickTimer = null;
+    viewer._clickTimer = null;
     viewer.querySelector('.story-content-area').addEventListener('click', (e) => {
       if (e.target.closest('.story-content-inner') || e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
-      if (contentClickTimer) {
-        clearTimeout(contentClickTimer);
-        contentClickTimer = null;
+      if (viewer._clickTimer) {
+        clearTimeout(viewer._clickTimer);
+        viewer._clickTimer = null;
         return;
       }
-      contentClickTimer = setTimeout(() => {
+      viewer._clickTimer = setTimeout(() => {
+        if (!viewerState) return;
         navigateStory(1);
-        contentClickTimer = null;
+        viewer._clickTimer = null;
       }, 260);
+      viewer._timers.push(viewer._clickTimer);
     });
 
     // Keyboard
@@ -510,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.addEventListener('keydown', keyHandler);
 
-    // ── Reply: Enter key ──
+    // ── Reply ──
     const replyInput = viewer.querySelector('.story-reply-input');
     const sendReply = () => {
       const val = replyInput.value.trim();
@@ -523,14 +533,14 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.className = 'story-toast';
       toast.textContent = 'Mensaje enviado a ' + userId;
       viewer.querySelector('.story-bottom').appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
+      viewer._timers.push(setTimeout(() => toast.remove(), 2000));
     };
     replyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendReply(); });
     viewer.querySelector('.story-send-btn').addEventListener('click', sendReply);
 
     // ── Like button ──
     const likeKey = 'storyLiked_' + userId + '_' + s.currentStoryIdx;
-    const likeBtn = document.getElementById('storyLikeBtn');
+    const likeBtn = viewer.querySelector('#storyLikeBtn');
     const likeSvg = likeBtn.querySelector('svg');
     const isLiked = localStorage.getItem(likeKey) === 'true';
     if (isLiked) {
@@ -545,15 +555,15 @@ document.addEventListener('DOMContentLoaded', () => {
       likeSvg.style.stroke = liked ? '#ed4956' : '';
       if (liked) likeSvg.style.animation = 'heartPop .3s ease';
       else likeSvg.style.animation = '';
-      setTimeout(() => { likeSvg.style.animation = ''; }, 300);
+      viewer._timers.push(setTimeout(() => { likeSvg.style.animation = ''; }, 300));
     });
 
     // ── Double-tap to like on content ──
     viewer.querySelector('.story-content-area').addEventListener('dblclick', (e) => {
       if (e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
-      if (contentClickTimer) {
-        clearTimeout(contentClickTimer);
-        contentClickTimer = null;
+      if (viewer._clickTimer) {
+        clearTimeout(viewer._clickTimer);
+        viewer._clickTimer = null;
       }
       const alreadyLiked = localStorage.getItem(likeKey) === 'true';
       if (!alreadyLiked) {
@@ -563,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Share button ──
-    document.getElementById('storyShareBtn').addEventListener('click', (e) => {
+    viewer.querySelector('#storyShareBtn').addEventListener('click', (e) => {
       e.stopPropagation();
       showShareModal(userId);
     });
@@ -583,6 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function navigateStory(dir) {
+    if (!viewerState) return;
     clearAutoAdvance();
     const s = viewerState;
     const userStories = storyData[s.userIds[s.currentUserIdx]].stories;
@@ -605,10 +616,16 @@ document.addEventListener('DOMContentLoaded', () => {
     s.currentStoryIdx = newStoryIdx;
     s.elapsed = 0;
 
-    const oldViewer = document.getElementById('storyViewer');
-    if (oldViewer) { oldViewer.remove(); document.removeEventListener('keydown', oldViewer._keyHandler); }
-
+    destroyViewer();
     renderStoryViewer();
+  }
+
+  function destroyViewer() {
+    const oldViewer = document.getElementById('storyViewer');
+    if (!oldViewer) return;
+    oldViewer._timers?.forEach(t => clearTimeout(t));
+    document.removeEventListener('keydown', oldViewer._keyHandler);
+    oldViewer.remove();
   }
 
   function startAutoAdvance() {
@@ -627,10 +644,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeStoryViewer() {
+    if (!viewerState) return;
     clearAutoAdvance();
     const viewer = document.getElementById('storyViewer');
     if (viewer) {
       viewer.classList.add('closing');
+      viewer._timers?.forEach(t => clearTimeout(t));
       document.removeEventListener('keydown', viewer._keyHandler);
       setTimeout(() => { viewer.remove(); document.body.style.overflow = ''; }, 200);
     }
