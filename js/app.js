@@ -103,14 +103,36 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(nav);
 
   // ─────────────────────────────────
-  //  POST INTERACTIONS
+  //  POST INTERACTIONS (persistent)
   // ─────────────────────────────────
   document.querySelectorAll('.post').forEach((post, i) => {
     if (!post.dataset.postId) post.dataset.postId = 'feed_' + i;
   });
 
   const savedLikes = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+  const savedCounts = JSON.parse(localStorage.getItem('postLikes') || '{}');
+  const savedSaves = JSON.parse(localStorage.getItem('savedPosts') || '{}');
 
+  // Restore saved like counts
+  document.querySelectorAll('.post').forEach(post => {
+    const id = post.dataset.postId;
+    if (savedCounts[id] !== undefined) {
+      const el = post.querySelector('.post-likes');
+      if (el) el.textContent = savedCounts[id] + ' likes';
+    }
+  });
+
+  // Restore saved bookmark state
+  document.querySelectorAll('.post-actions > svg:last-child').forEach(svg => {
+    const post = svg.closest('.post');
+    if (post && savedSaves[post.dataset.postId]) {
+      svg.classList.add('saved');
+      svg.style.fill = 'var(--text-primary)';
+      svg.style.stroke = 'var(--text-primary)';
+    }
+  });
+
+  // Like / unlike
   document.querySelectorAll('.post-actions-left svg:first-child').forEach(heart => {
     const post = heart.closest('.post');
     if (post && savedLikes[post.dataset.postId]) {
@@ -140,34 +162,53 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       likesEl.textContent = count + ' likes';
       const s = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+      const c = JSON.parse(localStorage.getItem('postLikes') || '{}');
       s[p.dataset.postId] = liked;
+      c[p.dataset.postId] = count;
       localStorage.setItem('likedPosts', JSON.stringify(s));
+      localStorage.setItem('postLikes', JSON.stringify(c));
       setTimeout(() => { this.style.animation = ''; }, 300);
     });
   });
 
-  // Comment toggle
+  // Comment toggle (persistent)
   document.querySelectorAll('.post-actions-left svg:nth-child(2)').forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       const post = this.closest('.post');
       if (!post) return;
+      const postId = post.dataset.postId;
       let section = post.querySelector('.comment-section');
       if (section) { section.remove(); return; }
       section = document.createElement('div');
       section.className = 'comment-section';
       section.innerHTML = '<div class="comment-input-wrapper"><input type="text" class="comment-input" placeholder="Agrega un comentario\u2026"><button class="comment-submit">Publicar</button></div>';
       post.querySelector('.post-caption')?.after(section);
+
+      // Load saved comments
+      const saved = JSON.parse(localStorage.getItem('comments_' + postId) || '[]');
+      saved.forEach(c => {
+        const d = document.createElement('div');
+        d.className = 'comment-item';
+        d.innerHTML = '<strong>' + c.user.replace(/</g, '&lt;') + '</strong> ' + c.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        section.insertBefore(d, section.querySelector('.comment-input-wrapper'));
+      });
+
       const input = section.querySelector('.comment-input');
       const submit = section.querySelector('.comment-submit');
       const add = () => {
         const t = input.value.trim();
         if (!t) return;
+        const user = localStorage.getItem('usuario') || 'usuario';
         const d = document.createElement('div');
         d.className = 'comment-item';
-        d.innerHTML = '<strong>' + (localStorage.getItem('usuario') || 'usuario') + '</strong> ' + t.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        d.innerHTML = '<strong>' + user.replace(/</g, '&lt;') + '</strong> ' + t.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         section.insertBefore(d, section.querySelector('.comment-input-wrapper'));
         input.value = '';
+        // Persist
+        const comments = JSON.parse(localStorage.getItem('comments_' + postId) || '[]');
+        comments.push({ user, text: t, timestamp: Date.now() });
+        localStorage.setItem('comments_' + postId, JSON.stringify(comments));
       };
       submit.addEventListener('click', add);
       input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') add(); });
@@ -175,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Save toggle
+  // Save / bookmark toggle (persistent)
   document.querySelectorAll('.post-actions > svg:last-child').forEach(svg => {
     svg.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -183,7 +224,128 @@ document.addEventListener('DOMContentLoaded', () => {
       const s = this.classList.contains('saved');
       this.style.fill = s ? 'var(--text-primary)' : 'none';
       this.style.stroke = s ? 'var(--text-primary)' : '';
+      const p = this.closest('.post');
+      if (p) {
+        const saves = JSON.parse(localStorage.getItem('savedPosts') || '{}');
+        saves[p.dataset.postId] = s;
+        localStorage.setItem('savedPosts', JSON.stringify(saves));
+      }
     });
+  });
+
+  // Double-tap to like on post image
+  function showFloatingHeart(container) {
+    const existing = container.querySelector('.floating-heart');
+    if (existing) existing.remove();
+    const heart = document.createElement('div');
+    heart.className = 'floating-heart';
+    heart.textContent = '\u2764';
+    heart.style.cssText = 'position:absolute;top:50%;left:50%;font-size:90px;color:#ed4956;transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:5;line-height:1;';
+    if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
+    container.appendChild(heart);
+    requestAnimationFrame(() => {
+      heart.style.transition = 'transform 0.3s cubic-bezier(0,0,0.2,1), opacity 0.35s ease';
+      heart.style.transform = 'translate(-50%,-50%) scale(1)';
+      heart.style.opacity = '1';
+    });
+    setTimeout(() => {
+      heart.style.opacity = '0';
+      heart.style.transform = 'translate(-50%,-50%) scale(1.4)';
+      setTimeout(() => heart.remove(), 400);
+    }, 400);
+  }
+
+  document.querySelectorAll('.post-image').forEach(img => {
+    img.addEventListener('dblclick', function (e) {
+      const post = this.closest('.post');
+      if (!post) return;
+      const heart = post.querySelector('.post-actions-left svg:first-child');
+      if (!heart) return;
+      if (!heart.classList.contains('liked')) {
+        heart.click();
+      }
+      showFloatingHeart(this);
+    });
+  });
+
+  // ─────────────────────────────────
+  //  REEL INTERACTIONS
+  // ─────────────────────────────────
+  document.querySelectorAll('.reel[data-post-id]').forEach(reel => {
+    const id = reel.dataset.postId;
+    const savedLikes = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+    const savedSaves = JSON.parse(localStorage.getItem('savedPosts') || '{}');
+
+    // Restore state
+    const likeSvg = reel.querySelector('.reel-like');
+    if (likeSvg && savedLikes[id]) {
+      likeSvg.classList.add('liked');
+      likeSvg.style.fill = '#ed4956';
+      likeSvg.style.stroke = '#ed4956';
+    }
+    const saveSvg = reel.querySelector('.reel-save');
+    if (saveSvg && savedSaves[id]) {
+      saveSvg.classList.add('saved');
+      saveSvg.style.fill = '#fff';
+      saveSvg.style.stroke = '#fff';
+    }
+
+    // Like toggle
+    if (likeSvg) {
+      likeSvg.addEventListener('click', function (e) {
+        e.stopPropagation();
+        this.classList.toggle('liked');
+        const liked = this.classList.contains('liked');
+        this.style.fill = liked ? '#ed4956' : 'none';
+        this.style.stroke = liked ? '#ed4956' : '';
+        const countEl = this.closest('.reel-action')?.querySelector('.reel-action-count');
+        if (countEl && liked) {
+          const raw = countEl.textContent.replace(/[^0-9.]/g, '');
+          const num = parseFloat(raw) || 0;
+          countEl.textContent = (num + 1) + (raw.includes('K') ? 'K' : '');
+        } else if (countEl) {
+          const raw = countEl.textContent.replace(/[^0-9.]/g, '');
+          const num = parseFloat(raw) || 0;
+          countEl.textContent = Math.max(0, num - 1) + (raw.includes('K') ? 'K' : '');
+        }
+        const s = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+        s[id] = liked;
+        localStorage.setItem('likedPosts', JSON.stringify(s));
+      });
+    }
+
+    // Save toggle
+    if (saveSvg) {
+      saveSvg.addEventListener('click', function (e) {
+        e.stopPropagation();
+        this.classList.toggle('saved');
+        const s = this.classList.contains('saved');
+        this.style.fill = s ? '#fff' : 'none';
+        this.style.stroke = s ? '#fff' : '';
+        const saves = JSON.parse(localStorage.getItem('savedPosts') || '{}');
+        saves[id] = s;
+        localStorage.setItem('savedPosts', JSON.stringify(saves));
+      });
+    }
+
+    // Comment toggle
+    const commentSvg = reel.querySelector('.reel-comment');
+    if (commentSvg) {
+      commentSvg.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const text = prompt('Escribe un comentario para ' + id + ':');
+        if (text && text.trim()) {
+          const comments = JSON.parse(localStorage.getItem('comments_' + id) || '[]');
+          comments.push({ user: localStorage.getItem('usuario') || 'usuario', text: text.trim(), timestamp: Date.now() });
+          localStorage.setItem('comments_' + id, JSON.stringify(comments));
+          const countEl = this.closest('.reel-action')?.querySelector('.reel-action-count');
+          if (countEl) {
+            const raw = parseInt(countEl.textContent) || 0;
+            countEl.textContent = (raw + 1);
+          }
+        }
+      });
+    }
   });
 
   // ─────────────────────────────────

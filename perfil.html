@@ -48,9 +48,18 @@
 
     <script src="js/app.js"></script>
     <script>
-        const user = JSON.parse(localStorage.getItem('usuario'));
-        if (user) {
-            document.getElementById('profile-username').textContent = user.usuario;
+        const username = localStorage.getItem('usuario');
+        if (username) {
+            document.getElementById('profile-username').textContent = username;
+        }
+
+        // Update stats from real data
+        const likesData = JSON.parse(localStorage.getItem('postLikes') || '{}');
+        let totalLikes = 0;
+        Object.values(likesData).forEach(c => totalLikes += c);
+        const statEls = document.querySelectorAll('.profile-stats strong');
+        if (statEls.length >= 2) {
+            statEls[1].textContent = totalLikes || '142';
         }
     </script>
 </body>

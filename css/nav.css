@@ -1015,6 +1015,80 @@ body.dark-mode .story-avatar.seen{
     background: #444;
 }
 
+/* ===== REEL OVERLAY & ACTIONS ===== */
+.reel {
+    position: relative;
+}
+
+.reel-overlay {
+    position: absolute;
+    right: 8px;
+    bottom: 80px;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+}
+
+.reel-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reel-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.reel-action svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.2s;
+}
+
+.reel-action svg:hover {
+    transform: scale(1.1);
+}
+
+.reel-action svg.liked {
+    fill: #ed4956;
+    stroke: #ed4956;
+}
+
+.reel-action svg.saved {
+    fill: #fff;
+    stroke: #fff;
+}
+
+.reel-action-count {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.reel-info {
+    z-index: 1;
+}
+
+/* ===== FLOATING HEART (double-tap) ===== */
+.floating-heart {
+    animation: floatHeartOut 0.4s ease forwards;
+}
+
+@keyframes floatHeartOut {
+    0% { opacity: 1; transform: translate(-50%,-50%) scale(0); }
+    40% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); }
+}
+
 /* ── Responsive ── */
 @media (min-width: 768px){
     .story-viewer{
