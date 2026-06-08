@@ -183,6 +183,231 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ─────────────────────────────────
+  //  STORY VIEWER
+  // ─────────────────────────────────
+
+  const storyData = {
+    viajante_: {
+      stories: [
+        { emoji: '\uD83C\uDF05', text: 'Atardecer en la playa', gradient: 'linear-gradient(135deg, #f093fb, #f5576c)' },
+        { emoji: '\uD83C\uDF0A', text: 'El mar nunca falla', gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
+      ],
+      avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'16\' fill=\'%23f5576c\'/%3E%3C/svg%3E'
+    },
+    foto_urbana: {
+      stories: [
+        { emoji: '\uD83C\uDF03', text: 'Luces de la ciudad', gradient: 'linear-gradient(135deg, #667eea, #764ba2)' },
+        { emoji: '\uD83C\uDFA8', text: 'Arte en cada esquina', gradient: 'linear-gradient(135deg, #f093fb, #4facfe)' }
+      ],
+      avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'16\' fill=\'%23764ba2\'/%3E%3C/svg%3E'
+    },
+    cafe_arte: {
+      stories: [
+        { emoji: '\u2615', text: 'Ma\u00F1ana de espresso', gradient: 'linear-gradient(135deg, #a18cd1, #fbc2eb)' },
+        { emoji: '\uD83C\uDF6A', text: 'Dulce tentaci\u00F3n', gradient: 'linear-gradient(135deg, #ffecd2, #fcb69f)' }
+      ],
+      avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'16\' fill=\'%23fbc2eb\'/%3E%3C/svg%3E'
+    },
+    naturaleza: {
+      stories: [
+        { emoji: '\uD83C\uDF33', text: 'Bosque encantado', gradient: 'linear-gradient(135deg, #11998e, #38ef7d)' },
+        { emoji: '\uD83C\uDF1F', text: 'Noche estrellada', gradient: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)' }
+      ],
+      avatar: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'16\' fill=\'%2338ef7d\'/%3E%3C/svg%3E'
+    }
+  };
+
+  let viewerState = null;
+
+  function markStorySeen(userId) {
+    document.querySelectorAll('.story[data-story-id="' + userId + '"] .story-avatar').forEach(el => el.classList.add('seen'));
+  }
+
+  function openStoryViewer(userId) {
+    if (userId === 'tu_historia') {
+      alert('Agrega tu historia tocando el bot\u00F3n "+"');
+      return;
+    }
+
+    markStorySeen(userId);
+    const data = storyData[userId];
+    if (!data) return;
+
+    const allIds = Object.keys(storyData);
+
+    viewerState = {
+      userIds: allIds,
+      currentUserIdx: allIds.indexOf(userId),
+      currentStoryIdx: 0,
+      timer: null,
+      elapsed: 0,
+      interval: null
+    };
+
+    renderStoryViewer();
+  }
+
+  function renderStoryViewer() {
+    const s = viewerState;
+    const userId = s.userIds[s.currentUserIdx];
+    const data = storyData[userId];
+    const story = data.stories[s.currentStoryIdx];
+
+    // Flat list of all stories across all users
+    const allUserIds = [];
+    const allStoryIndices = [];
+    s.userIds.forEach(id => {
+      storyData[id].stories.forEach((_, si) => {
+        allUserIds.push(id);
+        allStoryIndices.push(si);
+      });
+    });
+
+    let flatIdx = 0;
+    for (let i = 0; i < s.currentUserIdx; i++) { flatIdx += storyData[s.userIds[i]].stories.length; }
+    flatIdx += s.currentStoryIdx;
+
+    const viewer = document.createElement('div');
+    viewer.className = 'story-viewer';
+    viewer.id = 'storyViewer';
+
+    // Progress bars
+    let progressHTML = '<div class="story-progress">';
+    allUserIds.forEach((uid, i) => {
+      const cls = i < flatIdx ? 'done' : i === flatIdx ? 'active' : '';
+      progressHTML += '<div class="story-progress-bar ' + cls + '"><div class="fill"></div></div>';
+    });
+    progressHTML += '</div>';
+
+    viewer.innerHTML = progressHTML +
+      '<div class="story-gradient"></div>' +
+      '<div class="story-top">' +
+        '<div class="story-user">' +
+          '<div class="story-user-avatar"><img src="' + data.avatar + '" alt="avatar"></div>' +
+          '<div><span class="story-user-name">' + userId + '</span><span class="story-user-time">hace 1h</span></div>' +
+        '</div>' +
+        '<button class="story-close" id="storyClose">&times;</button>' +
+      '</div>' +
+      '<div class="story-content-area" style="background:' + story.gradient + '">' +
+        '<div class="story-tap-left" id="storyPrev"></div>' +
+        '<div class="story-content-inner">' +
+          '<div class="story-content-emoji">' + story.emoji + '</div>' +
+          '<div class="story-content-text">' + story.text + '</div>' +
+        '</div>' +
+        '<div class="story-tap-right" id="storyNext"></div>' +
+      '</div>' +
+      '<div class="story-bottom">' +
+        '<input type="text" class="story-reply-input" placeholder="Enviar mensaje\u2026" />' +
+        '<button class="story-send-btn">\u27A4</button>' +
+      '</div>';
+
+    document.body.appendChild(viewer);
+    document.body.style.overflow = 'hidden';
+
+    // Close handler
+    document.getElementById('storyClose').addEventListener('click', closeStoryViewer);
+
+    // Tap handlers
+    document.getElementById('storyPrev').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(-1); });
+    document.getElementById('storyNext').addEventListener('click', (e) => { e.stopPropagation(); navigateStory(1); });
+
+    // Tap on content area itself = next
+    viewer.querySelector('.story-content-area').addEventListener('click', (e) => {
+      if (e.target.closest('.story-content-inner') || e.target.closest('.story-tap-left') || e.target.closest('.story-tap-right')) return;
+      navigateStory(1);
+    });
+
+    // Keyboard
+    const keyHandler = (e) => {
+      if (e.key === 'Escape') closeStoryViewer();
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigateStory(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); navigateStory(-1); }
+    };
+    document.addEventListener('keydown', keyHandler);
+
+    // Reply
+    viewer.querySelector('.story-reply-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = e.target.value.trim();
+        if (val) { alert('Mensaje enviado a ' + userId + ': ' + val); e.target.value = ''; }
+      }
+    });
+
+    // Start auto-advance
+    startAutoAdvance();
+
+    // Store cleanup
+    viewer._keyHandler = keyHandler;
+
+    // Animate progress fill
+    requestAnimationFrame(() => {
+      const activeBar = viewer.querySelector('.story-progress-bar.active .fill');
+      if (activeBar) activeBar.style.transition = 'width ' + 4 + 's linear';
+      requestAnimationFrame(() => { if (activeBar) activeBar.style.width = '100%'; });
+    });
+  }
+
+  function navigateStory(dir) {
+    clearAutoAdvance();
+    const s = viewerState;
+    const userStories = storyData[s.userIds[s.currentUserIdx]].stories;
+
+    let newUserIdx = s.currentUserIdx;
+    let newStoryIdx = s.currentStoryIdx + dir;
+
+    if (newStoryIdx < 0) {
+      newUserIdx--;
+      if (newUserIdx < 0) { closeStoryViewer(); return; }
+      newStoryIdx = storyData[s.userIds[newUserIdx]].stories.length - 1;
+    } else if (newStoryIdx >= userStories.length) {
+      newUserIdx++;
+      if (newUserIdx >= s.userIds.length) { closeStoryViewer(); return; }
+      newStoryIdx = 0;
+    }
+
+    markStorySeen(s.userIds[newUserIdx]);
+    s.currentUserIdx = newUserIdx;
+    s.currentStoryIdx = newStoryIdx;
+    s.elapsed = 0;
+
+    const oldViewer = document.getElementById('storyViewer');
+    if (oldViewer) { oldViewer.remove(); document.removeEventListener('keydown', oldViewer._keyHandler); }
+
+    renderStoryViewer();
+  }
+
+  function startAutoAdvance() {
+    clearAutoAdvance();
+    viewerState.elapsed = 0;
+    viewerState.interval = setInterval(() => {
+      viewerState.elapsed += 0.1;
+      if (viewerState.elapsed >= 4) {
+        navigateStory(1);
+      }
+    }, 100);
+  }
+
+  function clearAutoAdvance() {
+    if (viewerState?.interval) { clearInterval(viewerState.interval); viewerState.interval = null; }
+  }
+
+  function closeStoryViewer() {
+    clearAutoAdvance();
+    const viewer = document.getElementById('storyViewer');
+    if (viewer) {
+      viewer.classList.add('closing');
+      document.removeEventListener('keydown', viewer._keyHandler);
+      setTimeout(() => { viewer.remove(); document.body.style.overflow = ''; }, 200);
+    }
+    viewerState = null;
+  }
+
+  // Bind story clicks
+  document.querySelectorAll('.story[data-story-id]').forEach(el => {
+    el.addEventListener('click', () => openStoryViewer(el.dataset.storyId));
+  });
+
+  // ─────────────────────────────────
   //  SEARCH
   // ─────────────────────────────────
   const searchInput = document.querySelector('.search-input');

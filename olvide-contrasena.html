@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instagram – Recuperar contraseña</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .reset-wrapper {
+      width: 100%;
+      max-width: 388px;
+    }
+
+    .reset-card {
+      background: #fff;
+      border: 1px solid #dbdbdb;
+      border-radius: 4px;
+      padding: 40px 32px;
+      text-align: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .reset-logo {
+      font-family: 'Grand Hotel', cursive;
+      font-size: 44px;
+      margin-bottom: 24px;
+      color: #262626;
+      transition: color 0.3s;
+    }
+
+    /* ── Step indicator ── */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #dbdbdb;
+      transition: background 0.4s, transform 0.3s;
+    }
+
+    .step-dot.active {
+      background: #0095f6;
+      transform: scale(1.3);
+    }
+
+    .step-dot.done {
+      background: #0095f6;
+      opacity: 0.5;
+    }
+
+    /* ── Steps container ── */
+    .step-content { display: none; animation: fadeStep 0.35s ease; }
+    .step-content.active { display: block; }
+
+    @keyframes fadeStep {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #262626;
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: #777;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      transition: color 0.3s;
+    }
+
+    .step-desc strong { color: #262626; transition: color 0.3s; }
+
+    /* ── Inputs ── */
+    .input-group {
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #777;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.3s;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dbdbdb;
+      border-radius: 6px;
+      background: #fafafa;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.3s, color 0.3s, box-shadow 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: #0095f6;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0,149,246,0.1);
+    }
+
+    .input-group input::placeholder { color: #bbb; }
+
+    /* ── Code inputs row ── */
+    .code-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .code-input {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      border: 2px solid #dbdbdb;
+      border-radius: 8px;
+      background: #fafafa;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s, background 0.3s, color 0.3s, transform 0.15s;
+    }
+
+    .code-input:focus {
+      border-color: #0095f6;
+      background: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 0 0 3px rgba(0,149,246,0.1);
+    }
+
+    .code-input.filled {
+      border-color: #0095f6;
+      background: rgba(0,149,246,0.05);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #0095f6;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, opacity 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-primary:hover { background: #1877f2; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    .btn-secondary {
+      background: none;
+      border: none;
+      color: #0095f6;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-secondary:hover { opacity: 0.8; }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #777;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: color 0.2s;
+    }
+
+    .btn-back:hover { color: #262626; }
+
+    /* ── Messages ── */
+    .msg {
+      font-size: 13px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+      animation: fadeStep 0.25s ease;
+    }
+
+    .msg.error {
+      display: block;
+      background: rgba(237,73,86,0.08);
+      color: #ed4956;
+    }
+
+    .msg.success {
+      display: block;
+      background: rgba(0,149,246,0.08);
+      color: #0095f6;
+    }
+
+    /* ── Success final ── */
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── Back to login ── */
+    .register-card {
+      background: #fff;
+      border: 1px solid #dbdbdb;
+      border-radius: 4px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 10px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .register-card p {
+      font-size: 14px;
+      color: #262626;
+      transition: color 0.3s;
+    }
+
+    .register-card a {
+      color: #0095f6;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ── DARK MODE ── */
+    body.dark-mode {
+      background-color: #0a0a0a;
+    }
+
+    body.dark-mode .reset-card,
+    body.dark-mode .register-card {
+      background: #1a1a1a;
+      border-color: #333;
+    }
+
+    body.dark-mode .reset-logo,
+    body.dark-mode .step-title {
+      color: #f5f5f5;
+    }
+
+    body.dark-mode .step-desc {
+      color: #999;
+    }
+
+    body.dark-mode .step-desc strong {
+      color: #f5f5f5;
+    }
+
+    body.dark-mode .input-group label {
+      color: #999;
+    }
+
+    body.dark-mode .input-group input {
+      background: #262626;
+      border-color: #333;
+      color: #f5f5f5;
+    }
+
+    body.dark-mode .input-group input:focus {
+      border-color: #0095f6;
+      background: #2a2a2a;
+      box-shadow: 0 0 0 3px rgba(0,149,246,0.15);
+    }
+
+    body.dark-mode .input-group input::placeholder {
+      color: #666;
+    }
+
+    body.dark-mode .code-input {
+      background: #262626;
+      border-color: #444;
+      color: #f5f5f5;
+    }
+
+    body.dark-mode .code-input:focus {
+      border-color: #0095f6;
+      background: #2a2a2a;
+    }
+
+    body.dark-mode .code-input.filled {
+      background: rgba(0,149,246,0.12);
+      border-color: #0095f6;
+    }
+
+    body.dark-mode .step-dot {
+      background: #444;
+    }
+
+    body.dark-mode .register-card p {
+      color: #999;
+    }
+
+    body.dark-mode .btn-back {
+      color: #999;
+    }
+
+    body.dark-mode .btn-back:hover {
+      color: #f5f5f5;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 420px) {
+      .reset-card { padding: 28px 20px; }
+      .code-input { width: 42px; height: 50px; font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="reset-wrapper">
+
+    <div class="reset-card">
+      <div class="reset-logo">Instagram</div>
+
+      <!-- Step dots -->
+      <div class="steps">
+        <div class="step-dot active" data-step="1"></div>
+        <div class="step-dot" data-step="2"></div>
+        <div class="step-dot" data-step="3"></div>
+      </div>
+
+      <!-- ═══ STEP 1: Email ═══ -->
+      <div class="step-content active" data-step="1">
+        <div class="step-title">¿Olvidaste tu contraseña?</div>
+        <div class="step-desc">Ingresa tu correo electrónico y te enviaremos un código para restablecerla.</div>
+
+        <div class="input-group">
+          <label>Correo electrónico</label>
+          <input type="email" id="resetEmail" placeholder="tucorreo@ejemplo.com" autocomplete="email" />
+        </div>
+
+        <div id="step1Msg" class="msg"></div>
+
+        <button class="btn-primary" id="btnSendCode">Enviar código</button>
+        <br/>
+        <button class="btn-back" onclick="location.href='index.html'">← Volver al inicio</button>
+      </div>
+
+      <!-- ═══ STEP 2: Code ═══ -->
+      <div class="step-content" data-step="2">
+        <div class="step-title">Ingresa el código</div>
+        <div class="step-desc">Enviamos un código de 6 dígitos a <strong id="codeEmailDisplay">tu correo</strong>.</div>
+
+        <div class="code-row" id="codeRow">
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" class="code-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        </div>
+
+        <div id="step2Msg" class="msg"></div>
+
+        <button class="btn-primary" id="btnVerifyCode">Verificar</button>
+        <br/>
+        <button class="btn-secondary" id="btnResendCode">Reenviar código</button>
+      </div>
+
+      <!-- ═══ STEP 3: New password ═══ -->
+      <div class="step-content" data-step="3">
+        <div class="step-title">Restablecer contraseña</div>
+        <div class="step-desc">Elige una contraseña segura que no hayas usado antes.</div>
+
+        <div class="input-group">
+          <label>Nueva contraseña</label>
+          <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" />
+        </div>
+
+        <div class="input-group">
+          <label>Confirmar contraseña</label>
+          <input type="password" id="confirmPassword" placeholder="Repite la contraseña" />
+        </div>
+
+        <div id="step3Msg" class="msg"></div>
+
+        <button class="btn-primary" id="btnReset">Restablecer</button>
+      </div>
+
+      <!-- ═══ STEP 4: Success (hidden dot) ═══ -->
+      <div class="step-content" data-step="4">
+        <div class="success-icon">✅</div>
+        <div class="step-title">Contraseña restablecida</div>
+        <div class="step-desc">Tu contraseña se ha actualizado correctamente. Ya puedes iniciar sesión.</div>
+        <button class="btn-primary" onclick="location.href='index.html'">Iniciar sesión</button>
+      </div>
+
+    </div>
+
+    <div class="register-card">
+      <p><a href="index.html">Volver al inicio de sesión</a></p>
+    </div>
+
+  </div>
+
+  <script>
+    (function() {
+      // ── State ──
+      let currentStep = 1;
+      let generatedCode = '';
+      let targetEmail = '';
+
+      // ── DOM refs ──
+      const steps = document.querySelectorAll('.step-content');
+      const dots  = document.querySelectorAll('.step-dot');
+      const msg1  = document.getElementById('step1Msg');
+      const msg2  = document.getElementById('step2Msg');
+      const msg3  = document.getElementById('step3Msg');
+      const emailInput = document.getElementById('resetEmail');
+      const codeInputs = document.querySelectorAll('.code-input');
+      const codeDisplay = document.getElementById('codeEmailDisplay');
+
+      // ── Show step ──
+      function goToStep(n) {
+        currentStep = n;
+        steps.forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+        dots.forEach(d => {
+          const dn = +d.dataset.step;
+          d.classList.toggle('active', dn === n);
+          d.classList.toggle('done', dn < n);
+        });
+        if (n === 2) setTimeout(() => codeInputs[0]?.focus(), 100);
+        if (n === 3) setTimeout(() => document.getElementById('newPassword')?.focus(), 100);
+      }
+
+      // ── Code auto‑advance ──
+      codeInputs.forEach((inp, i) => {
+        inp.addEventListener('input', () => {
+          inp.value = inp.value.replace(/\D/g, '').slice(0, 1);
+          inp.classList.toggle('filled', inp.value !== '');
+          if (inp.value && i < codeInputs.length - 1) codeInputs[i + 1].focus();
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !inp.value && i > 0) {
+            codeInputs[i - 1].value = '';
+            codeInputs[i - 1].classList.remove('filled');
+            codeInputs[i - 1].focus();
+          }
+          if (e.key === 'Enter') document.getElementById('btnVerifyCode').click();
+        });
+      });
+
+      // ── Step 1: Send code ──
+      document.getElementById('btnSendCode').addEventListener('click', () => {
+        const email = emailInput.value.trim();
+        if (!email || !email.includes('@')) {
+          msg1.className = 'msg error';
+          msg1.textContent = 'Ingresa un correo electrónico válido.';
+          return;
+        }
+        // Generate random 6‑digit code
+        generatedCode = String(Math.floor(100000 + Math.random() * 900000));
+        targetEmail = email;
+        // Store for validation
+        sessionStorage.setItem('resetCode', generatedCode);
+        sessionStorage.setItem('resetEmail', email);
+
+        msg1.className = 'msg success';
+        msg1.textContent = '✅ Código enviado a ' + email + ' (simulado: ' + generatedCode + ')';
+        codeDisplay.textContent = email;
+
+        setTimeout(() => { goToStep(2); }, 800);
+      });
+
+      // ── Step 2: Verify code ──
+      document.getElementById('btnVerifyCode').addEventListener('click', () => {
+        const entered = Array.from(codeInputs).map(i => i.value).join('');
+        if (entered.length < 6) {
+          msg2.className = 'msg error';
+          msg2.textContent = 'Ingresa el código completo de 6 dígitos.';
+          return;
+        }
+        const stored = sessionStorage.getItem('resetCode');
+        if (entered === stored) {
+          goToStep(3);
+        } else {
+          msg2.className = 'msg error';
+          msg2.textContent = 'Código incorrecto. Intenta de nuevo.';
+          // Shake animation
+          const row = document.getElementById('codeRow');
+          row.style.animation = 'shake 0.4s ease';
+          setTimeout(() => row.style.animation = '', 400);
+        }
+      });
+
+      // ── Resend code ──
+      document.getElementById('btnResendCode').addEventListener('click', () => {
+        generatedCode = String(Math.floor(100000 + Math.random() * 900000));
+        sessionStorage.setItem('resetCode', generatedCode);
+        msg2.className = 'msg success';
+        msg2.textContent = '✅ Nuevo código enviado (simulado: ' + generatedCode + ')';
+        setTimeout(() => { msg2.className = 'msg'; msg2.textContent = ''; }, 3000);
+      });
+
+      // ── Step 3: Reset password ──
+      document.getElementById('btnReset').addEventListener('click', () => {
+        const np = document.getElementById('newPassword').value;
+        const cp = document.getElementById('confirmPassword').value;
+        if (!np || np.length < 6) {
+          msg3.className = 'msg error';
+          msg3.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+          return;
+        }
+        if (np !== cp) {
+          msg3.className = 'msg error';
+          msg3.textContent = 'Las contraseñas no coinciden.';
+          return;
+        }
+        // Update password in localStorage
+        localStorage.setItem('password', np);
+        goToStep(4);
+      });
+
+      // ── Enter key support ──
+      emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('btnSendCode').click(); });
+      document.getElementById('newPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('btnReset').click(); });
+      document.getElementById('confirmPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('btnReset').click(); });
+
+      // ── Shake animation inject ──
+      const style = document.createElement('style');
+      style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }';
+      document.head.appendChild(style);
+
+      // ── Dark mode restore ──
+      if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
+    })();
+  </script>
+
+</body>
+</html>
