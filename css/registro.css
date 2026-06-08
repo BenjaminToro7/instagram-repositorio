@@ -1,0 +1,58 @@
+.registro-subtitle {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.terminos {
+    font-size: 12px;
+    color: #999;
+    margin-top: 16px;
+    line-height: 1.5;
+}
+
+.terminos a {
+    color: #0095f6;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.terminos a:hover {
+    text-decoration: underline;
+}
+
+#cerrarSesion {
+    display: block;
+    margin: 20px auto;
+    padding: 8px 24px;
+    background: none;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #ed4956;
+    transition: background 0.2s, border-color 0.3s, color 0.3s;
+}
+
+#cerrarSesion:hover {
+    background: #fef0f0;
+}
+
+/* Dark mode */
+body.dark-mode #cerrarSesion {
+    border-color: #333;
+    color: #ff6b7a;
+}
+
+body.dark-mode #cerrarSesion:hover {
+    background: #2a1518;
+}
+
+body.dark-mode .registro-subtitle {
+    color: #999;
+}
+
+body.dark-mode .terminos {
+    color: #777;
+}
