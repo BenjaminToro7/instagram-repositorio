@@ -1,0 +1,410 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #fafafa;
+    padding-bottom: 60px;
+}
+
+.page-content{
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid #dbdbdb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.top-bar .logo{
+    font-family: 'Grand Hotel', cursive;
+    font-size: 28px;
+    color: #262626;
+}
+
+.top-bar .top-icons{
+    display: flex;
+    gap: 16px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #dbdbdb;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 100;
+}
+
+.nav-item{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #262626;
+    font-size: 10px;
+    padding: 4px 12px;
+    transition: color 0.2s;
+}
+
+.nav-item svg{
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+    fill: none;
+    stroke: #262626;
+    stroke-width: 1.5;
+    transition: fill 0.2s, stroke 0.2s;
+}
+
+.nav-item.active{
+    color: #0095f6;
+}
+
+.nav-item.active svg{
+    fill: #0095f6;
+    stroke: #0095f6;
+}
+
+.nav-item span{
+    font-size: 11px;
+}
+
+/* ===== STORY ROW ===== */
+.stories-row{
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.stories-row::-webkit-scrollbar{
+    display: none;
+}
+
+.story{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    min-width: 64px;
+}
+
+.story-avatar{
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+    padding: 2px;
+}
+
+.story-avatar img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+    background: #ccc;
+}
+
+.story-name{
+    font-size: 11px;
+    color: #262626;
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== POST ===== */
+.post{
+    background: white;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.post-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.post-user{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.post-avatar{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f58529, #dd2a7b);
+    padding: 2px;
+}
+
+.post-avatar img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+    background: #ccc;
+}
+
+.post-image{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: #999;
+}
+
+.post-actions{
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    font-size: 24px;
+}
+
+.post-actions-left{
+    display: flex;
+    gap: 14px;
+}
+
+.post-actions svg{
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    fill: none;
+    stroke: #262626;
+    stroke-width: 1.5;
+    transition: fill 0.2s;
+}
+
+.post-actions svg:hover{
+    opacity: 0.6;
+}
+
+.post-likes{
+    padding: 0 16px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.post-caption{
+    padding: 4px 16px 12px;
+    font-size: 14px;
+}
+
+.post-caption strong{
+    margin-right: 6px;
+}
+
+/* ===== SEARCH PAGE ===== */
+.search-input{
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    background: #fafafa;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.search-input:focus{
+    outline: none;
+    border-color: #0095f6;
+}
+
+.search-suggestion{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.search-suggestion img{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ccc;
+}
+
+.search-suggestion div{
+    flex: 1;
+}
+
+.search-suggestion strong{
+    display: block;
+    font-size: 14px;
+}
+
+.search-suggestion span{
+    font-size: 12px;
+    color: #999;
+}
+
+/* ===== REELS PAGE ===== */
+.reels-container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.reel{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    background: #111;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.reel-info{
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+}
+
+.reel-info strong{
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* ===== MESSAGES PAGE ===== */
+.chat-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+}
+
+.chat-item:last-child{
+    border-bottom: none;
+}
+
+.chat-item img{
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ccc;
+}
+
+.chat-item div{
+    flex: 1;
+}
+
+.chat-item strong{
+    display: block;
+    font-size: 14px;
+}
+
+.chat-item span{
+    font-size: 13px;
+    color: #999;
+}
+
+/* ===== PROFILE PAGE ===== */
+.profile-header{
+    text-align: center;
+    padding: 20px 0;
+}
+
+.profile-pic{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+    padding: 3px;
+    margin: 0 auto 12px;
+}
+
+.profile-pic img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid white;
+    object-fit: cover;
+    background: #ccc;
+}
+
+.profile-stats{
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 16px 0;
+}
+
+.profile-stats div{
+    text-align: center;
+}
+
+.profile-stats strong{
+    display: block;
+    font-size: 16px;
+}
+
+.profile-stats span{
+    font-size: 12px;
+    color: #999;
+}
+
+.profile-bio{
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.profile-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 16px;
+}
+
+.grid-item{
+    aspect-ratio: 1 / 1;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #999;
+}

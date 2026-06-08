@@ -132,6 +132,24 @@ body{
     border-color: #0095f6;
 }
 
+.error-msg{
+    color: #ed4956;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+    text-align: center;
+}
+
+.toggle-password{
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+}
+
 .btn-primary{
     width: 100%;
     padding: 12px;
@@ -142,6 +160,11 @@ body{
     font-weight: bold;
     cursor: pointer;
     margin-top: 10px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary:active{
+    transform: scale(0.98);
 }
 
 .btn-primary:hover{
