@@ -4,7 +4,6 @@ const usuario = document.getElementById("usuario");
 const password = document.getElementById("password");
 
 const btnRegister = document.getElementById("btnRegister");
-
 const errorMsg = document.getElementById("error-msg");
 
 btnRegister.addEventListener("click", function() {
@@ -16,11 +15,15 @@ btnRegister.addEventListener("click", function() {
 
     if(tel === "" || nom === "" || user === "" || pass === "") {
 
-        errorMsg.textContent = "Debes completar todos los campos";
+        errorMsg.textContent = "Completa todos los campos";
 
     } else {
 
-        errorMsg.textContent = "Registro completado correctamente";
+        localStorage.setItem("usuario", user);
+        localStorage.setItem("password", pass);
+        localStorage.setItem("nombre", nom);
+
+        window.location.href = "home.html";
 
     }
 
@@ -40,3 +43,16 @@ function togglePassword() {
     }
 
 }
+
+
+const cerrarSesion = document.getElementById("cerrarSesion");
+
+cerrarSesion.addEventListener("click", function() {
+
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("password");
+    localStorage.removeItem("nombre");
+
+    window.location.href = "index.html";
+
+});

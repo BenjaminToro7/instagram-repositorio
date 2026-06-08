@@ -2,7 +2,6 @@ const usuario = document.getElementById("usuario");
 const password = document.getElementById("password");
 
 const botonLogin = document.querySelector(".btn-primary");
-
 const errorMsg = document.getElementById("error-msg");
 
 botonLogin.addEventListener("click", function() {
@@ -10,13 +9,16 @@ botonLogin.addEventListener("click", function() {
     let user = usuario.value;
     let pass = password.value;
 
-    if(user === "" || pass === "") {
+    let usuarioGuardado = localStorage.getItem("usuario");
+    let passwordGuardada = localStorage.getItem("password");
 
-        errorMsg.textContent = "Completa todos los campos";
+    if(user === usuarioGuardado && pass === passwordGuardada) {
+
+        window.location.href = "home.html";
 
     } else {
 
-        errorMsg.textContent = "Inicio de sesión exitoso";
+        errorMsg.textContent = "Usuario o contraseña incorrectos";
 
     }
 
