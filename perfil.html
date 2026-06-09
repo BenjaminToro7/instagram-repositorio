@@ -25,9 +25,9 @@
             </div>
             <strong style="font-size:14px;" id="profile-username">usuario</strong>
             <div class="profile-stats">
-                <div><strong>6</strong><span>Publicaciones</span></div>
-                <div><strong>142</strong><span>Seguidores</span></div>
-                <div><strong>89</strong><span>Seguidos</span></div>
+                <div><strong id="stat-publicaciones">0</strong><span>Publicaciones</span></div>
+                <div><strong id="stat-seguidores">0</strong><span>Seguidores</span></div>
+                <div><strong id="stat-seguidos">0</strong><span>Seguidos</span></div>
             </div>
             <div class="profile-bio">✌️ Explorando el mundo</div>
             <button style="width:100%;padding:8px;border:1px solid #dbdbdb;border-radius:8px;background:white;font-weight:600;cursor:pointer;margin-top:12px;">
@@ -46,21 +46,5 @@
 
     </div>
 
-    <script src="js/app.js"></script>
-    <script>
-        const username = localStorage.getItem('usuario');
-        if (username) {
-            document.getElementById('profile-username').textContent = username;
-        }
-
-        // Update stats from real data
-        const likesData = JSON.parse(localStorage.getItem('postLikes') || '{}');
-        let totalLikes = 0;
-        Object.values(likesData).forEach(c => totalLikes += c);
-        const statEls = document.querySelectorAll('.profile-stats strong');
-        if (statEls.length >= 2) {
-            statEls[1].textContent = totalLikes || '142';
-        }
-    </script>
 </body>
 </html>

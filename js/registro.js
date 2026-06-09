@@ -22,6 +22,9 @@ btnRegister.addEventListener("click", function() {
         localStorage.setItem("usuario", user);
         localStorage.setItem("password", pass);
         localStorage.setItem("nombre", nom);
+        localStorage.setItem("publicaciones", "0");
+        localStorage.setItem("seguidores", "0");
+        localStorage.setItem("seguidos", "0");
 
         window.location.href = "home.html";
 
