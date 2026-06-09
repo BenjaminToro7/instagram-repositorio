@@ -3,48 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil</title>
-    <link rel="stylesheet" href="css/nav.css">
+    <title>13x_67 - Perfil Instagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .perfil {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        /* Header con avatar e info */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #f09433, #d62976);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .info {
+            flex: 1;
+        }
+
+        .username {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            background: #efefef;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-primario {
+            background: #0095f6;
+            color: white;
+        }
+
+        /* Estadísticas */
+        .estadisticas {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .estadistica {
+            font-size: 14px;
+        }
+
+        .numero {
+            font-weight: 600;
+        }
+
+        /* Nombre y bio */
+        .nombre {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .bio {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .link {
+            font-size: 14px;
+            color: #00376b;
+            text-decoration: none;
+        }
+
+        /* Sección "Nueva" / "Comparte fotos" */
+        .mensaje-compartir {
+            background: #efefef;
+            padding: 35px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #dbdbdb;
+            margin-top: 10px;
+            padding-top: 12px;
+        }
+
+        .tab {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: #8e8e8e;
+        }
+
+        .tab.activo {
+            color: #0095f6;
+            border-top: 1px solid #0095f6;
+            margin-top: -13px;
+            padding-top: 12px;
+        }
+
+        /* Grid de fotos */
+        .grid-fotos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-top: 10px;
+        }
+
+        .foto-placeholder {
+            aspect-ratio: 1;
+            background: #efefef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #8e8e8e;
+        }
+    </style>
 </head>
 <body>
+    <div class="perfil">
+        <!-- Header con datos de 13x_67 -->
+        <div class="header">
+            <div class="avatar">📷</div>
+            <div class="info">
+                <div class="username">13x_67</div>
+                <div class="botones">
+                    <button class="btn btn-primario">Editar perfil</button>
+                    <button class="btn">Ver archivo</button>
+                </div>
+            </div>
+        </div>
 
-    <div class="top-bar">
-        <span style="font-weight:600;font-size:16px;">Perfil</span>
-        <div class="top-icons">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-width="1.5">
-                <path d="M12 5v14M5 12h14"/>
-            </svg>
+        <!-- Estadísticas -->
+        <div class="estadisticas">
+            <div class="estadistica"><span class="numero">24</span> publicaciones</div>
+            <div class="estadistica"><span class="numero">1,204</span> seguidores</div>
+            <div class="estadistica"><span class="numero">???</span> seguidos</div>
+        </div>
+
+        <!-- Nombre y bio de 13x_67 -->
+        <div class="nombre">Leandro Oyarzun Robles</div>
+        <div class="bio">Desarrollador Web | HTML5 · CSS3 · JavaScript</div>
+        <div class="bio">Aprendiendo a construir la web del futuro</div>
+        <a href="#" class="link">github.com/13x_67</a>
+
+        <!-- Mensaje tipo "Comparte fotos" como en bxnnjx -->
+        <div class="mensaje-compartir">
+            📸 Comparte fotos<br>
+            Cuando compartas fotos, aparecerán en tu perfil.
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab activo">PUBLICACIONES</div>
+            <div class="tab">GUARDADOS</div>
+            <div class="tab">ETIQUETADOS</div>
+        </div>
+
+        <!-- Grid de fotos (vacío por ahora) -->
+        <div class="grid-fotos">
+            <div class="foto-placeholder">📷</div>
+            <div class="foto-placeholder">📷</div>
+            <div class="foto-placeholder">📷</div>
+            <div class="foto-placeholder">📷</div>
+            <div class="foto-placeholder">📷</div>
+            <div class="foto-placeholder">📷</div>
         </div>
     </div>
+    <script>
+    let perfil = {
+        nombre: "Leandro Oyarzun Robles",
+        bio: "Desarrollador Web | HTML5 · CSS3 · JavaScript",
+        bio2: "Aprendiendo a construir la web del futuro",
+        github: "github.com/13x_67",
+        publicaciones: 24,
+        seguidores: 1204,
+        seguidos: 58,
+        fotos: []
+    };
 
-    <div class="page-content">
+    const editarPerfilBtn = document.querySelector('.btn-primario');
+    const verArchivoBtn = document.querySelector('.btn:not(.btn-primario)');
+    const mensajeCompartir = document.querySelector('.mensaje-compartir');
+    const gridFotos = document.querySelector('.grid-fotos');
+    const tabs = document.querySelectorAll('.tab');
+    const publicacionesSpan = document.querySelector('.estadisticas .estadistica:first-child .numero');
+    const seguidoresSpan = document.querySelector('.estadisticas .estadistica:nth-child(2) .numero');
+    const seguidosSpan = document.querySelector('.estadisticas .estadistica:nth-child(3) .numero');
 
-        <div class="profile-header">
-            <div class="profile-pic">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23ddd'/%3E%3Ctext x='40' y='45' text-anchor='middle' font-size='30' fill='%23999'%3E👤%3C/text%3E%3C/svg%3E" alt="profile">
-            </div>
-            <strong style="font-size:14px;" id="profile-username">usuario</strong>
-            <div class="profile-stats">
-                <div><strong id="stat-publicaciones">0</strong><span>Publicaciones</span></div>
-                <div><strong id="stat-seguidores">0</strong><span>Seguidores</span></div>
-                <div><strong id="stat-seguidos">0</strong><span>Seguidos</span></div>
-            </div>
-            <div class="profile-bio">✌️ Explorando el mundo</div>
-            <button style="width:100%;padding:8px;border:1px solid #dbdbdb;border-radius:8px;background:white;font-weight:600;cursor:pointer;margin-top:12px;">
-                Editar perfil
-            </button>
-        </div>
+    function actualizarEstadisticas() {
+        publicacionesSpan.textContent = perfil.publicaciones;
+        seguidoresSpan.textContent = perfil.seguidores.toLocaleString();
+        seguidosSpan.textContent = perfil.seguidos;
+    }
 
-        <div class="profile-grid">
-            <div class="grid-item">📸</div>
-            <div class="grid-item">🌅</div>
-            <div class="grid-item">☕</div>
-            <div class="grid-item">🏔️</div>
-            <div class="grid-item">🎵</div>
-            <div class="grid-item">🌊</div>
-        </div>
+    function renderizarGrid() {
+        gridFotos.innerHTML = '';
+        if (perfil.fotos.length === 0) {
+            for (let i = 0; i < 6; i++) {
+                const div = document.createElement('div');
+                div.className = 'foto-placeholder';
+                div.textContent = '📷';
+                gridFotos.appendChild(div);
+            }
+            if (mensajeCompartir) mensajeCompartir.style.display = 'block';
+        } else {
+            perfil.fotos.forEach(foto => {
+                const div = document.createElement('div');
+                div.className = 'foto-placeholder';
+                div.style.background = '#ddd';
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.justifyContent = 'center';
+                div.style.fontSize = '30px';
+                div.textContent = '🖼️';
+                gridFotos.appendChild(div);
+            });
+            if (mensajeCompartir) mensajeCompartir.style.display = 'none';
+        }
+    }
 
-    </div>
+    editarPerfilBtn.addEventListener('click', () => {
+        const nuevoNombre = prompt('Editar nombre:', perfil.nombre);
+        if (nuevoNombre && nuevoNombre.trim()) {
+            perfil.nombre = nuevoNombre.trim();
+            document.querySelector('.nombre').textContent = perfil.nombre;
+        }
 
+        const nuevaBio = prompt('Editar bio principal:', perfil.bio);
+        if (nuevaBio && nuevaBio.trim()) {
+            perfil.bio = nuevaBio.trim();
+            document.querySelector('.bio').textContent = perfil.bio;
+        }
+
+        const nuevaBio2 = prompt('Editar segunda línea de bio:', perfil.bio2);
+        if (nuevaBio2 && nuevaBio2.trim()) {
+            perfil.bio2 = nuevaBio2.trim();
+            document.querySelectorAll('.bio')[1].textContent = perfil.bio2;
+        }
+
+        const nuevoGit = prompt('Editar link de GitHub:', perfil.github);
+        if (nuevoGit && nuevoGit.trim()) {
+            perfil.github = nuevoGit.trim();
+            document.querySelector('.link').textContent = perfil.github;
+        }
+    });
+
+    verArchivoBtn.addEventListener('click', () => {
+        alert(`📁 ARCHIVO DE USUARIO\n\nUsuario: 13x_67\nNombre: ${perfil.nombre}\nBio: ${perfil.bio}\nPublicaciones: ${perfil.publicaciones}\nSeguidores: ${perfil.seguidores}\nSeguidos: ${perfil.seguidos}\nFotos compartidas: ${perfil.fotos.length}`);
+    });
+
+    if (mensajeCompartir) {
+        mensajeCompartir.addEventListener('click', () => {
+            const nuevaFoto = prompt('¡Compartí una foto!');
+            if (nuevaFoto !== null) {
+                perfil.fotos.push(nuevaFoto || '📸 Nueva foto');
+                perfil.publicaciones = perfil.fotos.length;
+                actualizarEstadisticas();
+                renderizarGrid();
+                alert(`✅ Foto compartida. Ahora tenés ${perfil.publicaciones} publicaciones.`);
+            }
+        });
+    }
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('activo'));
+            tab.classList.add('activo');
+
+            if (index === 0) {
+                renderizarGrid();
+                if (mensajeCompartir) mensajeCompartir.style.display = perfil.fotos.length === 0 ? 'block' : 'none';
+            } else if (index === 1) {
+                gridFotos.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'foto-placeholder';
+                    div.textContent = '🔒';
+                    div.style.background = '#f0f0f0';
+                    gridFotos.appendChild(div);
+                }
+                if (mensajeCompartir) mensajeCompartir.style.display = 'none';
+            } else if (index === 2) {
+                gridFotos.innerHTML = '';
+                const div = document.createElement('div');
+                div.style.gridColumn = 'span 3';
+                div.style.padding = '40px';
+                div.style.textAlign = 'center';
+                div.style.color = '#8e8e8e';
+                div.textContent = '📷 No hay fotos en las que te hayan etiquetado';
+                gridFotos.appendChild(div);
+                if (mensajeCompartir) mensajeCompartir.style.display = 'none';
+            }
+        });
+    });
+
+    actualizarEstadisticas();
+    renderizarGrid();
+</script>
 </body>
 </html>
